@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>Survey Expense Approval</title>
+</head>
+<body>
+
+    <h2>Hello {{ recipient_name }},</h2>
+    <p>You have submitted the following expenses for approval:</p>
+
+    <table border="1" cellpadding="5" cellspacing="0">
+        <tr>
+            <th>Expense Type</th>
+            <th>Amount ($)</th>
+        </tr>
+        <tr>
+            <td>Tea Expense</td>
+            <td>${{ tea_expense }}</td>
+        </tr>
+        <tr>
+            <td>Coffee Expense</td>
+            <td>${{ coffee_expense }}</td>
+        </tr>
+        <tr>
+            <td>Biscuit Expense</td>
+            <td>${{ biscuit_expense }}</td>
+        </tr>
+        <tr>
+            <td>Smoking Expense</td>
+            <td>${{ smoking_expense }}</td>
+        </tr>
+    </table>
+
+    <p>Please review and approve the expenses by clicking the link below:</p>
+
+    <p>
+        <a href="{{ approval_link }}">Approve Expenses</a>
+    </p>
+
+    <p>If you have any questions, please reply to this email.</p>
+
+    <p>Best regards,<br>Admin</p>
+
+</body>
+</html>
+
+
+
+
+
+<!-- <!DOCTYPE html>
+<html>
+<head>
+<title>Survey Expense Approval</title>
+</head>
+<body>
+<h2>Hello {{ recipient_name }},</h2>
+<p>You have submitted the following expenses for approval:</p>
+
+     <ul>
+         <li><strong>Tea Expense:</strong> ${{ tea_expense }}</li>
+         <li><strong>Coffee Expense:</strong> ${{ coffee_expense }}</li>
+         <li><strong>Biscuit Expense:</strong> ${{ biscuit_expense }}</li>        <li><strong>Smoking Expense:</strong> ${{ smoking_expense }}</li>
+    </ul>
+
+     <p>Please review and approve the expenses by clicking the link below:</p>
+
+     <a href="{{ approval_link }}" style="display:inline-block;padding:10px 20px;background:#4CAF50;color:white;text-decoration:none;border-radius:5px;">
+         Approve Expenses
+     </a>
+
+     <p>If you have any questions, please reply to this email.</p>
+
+     <p>Best regards,<br>Admin</p>
+ </body>
+</html> -->
+
+
+
+
+
