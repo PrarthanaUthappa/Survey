@@ -85,16 +85,23 @@ def dashboard(request):
     forms = Form.objects.all()
     return render(request, "Survey_app/dashboard.html", {"forms": forms})
 
+
+
+def admin_review_forms(request):
+    pending_forms = Form.objects.filter(approved=False)
+    return render(request, "admin_review.html", {"pending_forms": pending_forms})
+
+
 # @login_required
 # @user_passes_test(is_admin)
-# def approve(request, form_id):
-#     form = get_object_or_404(Form, id=form_id)
-#     if not form.isapprove:
-#         form.Password = ''.join(random.choices(string.ascii_letters + string.digits, k=8))
-#         form.isapprove = True
-#         form.save()
-#         send_expense_email(form.Email, "Approved", form.Link)
-#     return redirect("dashboard")
+def approve_form(request):
+    if request.method == "POST":
+        form_id = request.POST.get("form_id")
+        form_entry = Form.objects.get(id=form_id)
+        form_entry.approved = True
+        form_entry.save()
+        return redirect("admin_review_forms")
+    return HttpResponse("Invalid request", status=400)
 
 def send_expense_email(user_email, status, form_link):
     subject = f"Expense Form - {status}"

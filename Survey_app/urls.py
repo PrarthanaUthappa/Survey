@@ -1,6 +1,6 @@
 from django.urls import path
 from . import views
-from .views import submit_expense_with_id,send_invite_email,submit_expense,fill_form,success_page
+from .views import submit_expense_with_id,send_invite_email,submit_expense,fill_form,success_page, approve_form,admin_review_forms
 
 urlpatterns = [
     path('submit_expense_with_id/<str:Unique_id>/', submit_expense_with_id, name='submit_expense_with_id'),
@@ -9,11 +9,9 @@ urlpatterns = [
     # path('fill_form/<str:unique_id>/',submit_expense_with_id , name='fill_form'),
     path('fill_form/<str:unique_id>/',fill_form , name='fill_form'),
     path("success/", success_page, name="success_page"),
-    
-    # path('dashboard/', views.dashboard, name='dashboard'),
-    # path('approve/<int:form_id>/', views.approve, name='approve_form'),
-    # path('dashboard-user/<int:form_id>/', views.dashboard_user, name='dashboard_user'),
-    # path("submit_expense/",views.submit_expense, name="submit_expense"),
+    path("admin/review_forms/", admin_review_forms, name="admin_review_forms"),
+    path("admin/approve_form/", approve_form, name="approve_form"),
+   
 ]
 
 

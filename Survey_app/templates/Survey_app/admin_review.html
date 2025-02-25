@@ -1,0 +1,22 @@
+<!-- templates/admin_review.html -->
+<h2>Pending Survey Responses</h2>
+<table border="1">
+    <tr>
+        <th>Email</th>
+        <th>Submitted At</th>
+        <th>Actions</th>
+    </tr>
+    {% for response in pending_forms %}
+    <tr>
+        <td>{{ response.Email }}</td>
+        <td>{{ response.Created_Time }}</td>
+        <td>
+            <form method="POST">
+                {% csrf_token %}
+                <input type="hidden" name="form_id" value="{{ response.id }}">
+                <button type="submit">Approve</button>
+            </form>
+        </td>
+    </tr>
+    {% endfor %}
+</table>
