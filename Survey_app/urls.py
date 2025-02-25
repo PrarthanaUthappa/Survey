@@ -6,7 +6,7 @@ urlpatterns = [
     path('submit_expense_with_id/<str:Unique_id>/', submit_expense_with_id, name='submit_expense_with_id'),
     path('submit_expense/', submit_expense, name='submit_expense'),
     path('send_email/', send_invite_email, name='send_email'),
-    path('fill_form/<str:unique_id>/',submit_expense_with_id , name='fill_form'),
+    # path('fill_form/<str:unique_id>/',submit_expense_with_id , name='fill_form'),
     path('fill_form/<str:unique_id>/',fill_form , name='fill_form'),
     path("success/", success_page, name="success_page"),
     

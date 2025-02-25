@@ -61,8 +61,12 @@ def Survey_email(request):
 @login_required
 def submit_expense_with_id(request, unique_id):
     # form_entry = get_object_or_404(Form, Link=f"http://127.0.0.1:8000/fill_form/{unique_id}")
-    form_entry = get_object_or_404(Form, Link__icontains=unique_id)
+    form_entry = get_object_or_404(Form, unique_id=unique_id)
+    # Try to fetch the form entry, create one if not found
+    form_entry, created = Form.objects.get_or_create(Link=unique_id)
 
+    if created:
+        print(f"New Form entry created for unique_id: {unique_id}")
     if request.method == "POST":
         form_entry.tea_expense = float(request.POST.get("tea", 0))
         form_entry.coffee_expense = float(request.POST.get("coffee", 0))
@@ -114,28 +118,28 @@ def submit_expense(request):
     return render(request, 'expense_form.html', {'form': form})
 
 
-
 def fill_form(request, unique_id):
-   def fill_form(request, unique_id):
-    form, created = Form.objects.get_or_create(Link=unique_id)
-
+    form, created = Form.objects.get_or_create(Link=unique_id, defaults={"Email": "", "Password": ""})
+    
     if request.method == "POST":
         form.Email = request.POST.get("email")
         form.Password = request.POST.get("password")
         form.save()
-        return redirect("success_page")  # Change to your success URL
+        return redirect("success_page")  # Redirect after submission
 
-    return render(request, "fill_form.html", {"form": form})
-   
+    return render(request, "Survey_app/fill_form.html", {"form": form, "created": created})
+
+
 def success_page(request):
-    return render(request, "success.html")
-
+    return render(request, "Survey_app/success.html")
 
 
 def send_invite_email(request):
     recipient_email = "prarthanauthappa713@gmail.com"
     unique_id = str(uuid.uuid4()) 
-    form_link = f"http://127.0.0.1:8000/fill_form/{unique_id}"
+    # form_link = f"http://127.0.0.1:8000/fill_form/{unique_id}"
+    form_link = request.build_absolute_uri(f"/fill_form/{unique_id}/")
+
  
 
     subject = "Fill Out Your Daily Expenses"

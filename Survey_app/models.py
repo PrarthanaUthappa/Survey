@@ -1,10 +1,10 @@
 from django.db import models
 import uuid
 class Form(models.Model):
-    Email=models.EmailField()
+    Email = models.EmailField(blank=True, null=True)
     unique_id = models.UUIDField(default=uuid.uuid4, unique=True, blank=True, null=True)
     Created_Time=models.DateTimeField(auto_now_add=True)
-    Link =models.URLField()
+    Link = models.CharField(max_length=255, unique=True)  
     tea_expense = models.DecimalField(max_digits=5, decimal_places=2, default=0.00)
     coffee_expense = models.DecimalField(max_digits=5, decimal_places=2, default=0.00)
     biscuit_expense = models.DecimalField(max_digits=5, decimal_places=2, default=0.00)
