@@ -60,7 +60,9 @@ def Survey_email(request):
 
 @login_required
 def submit_expense_with_id(request, unique_id):
-    form_entry = get_object_or_404(Form, Link=f"http://127.0.0.1:8000/fill_form/{unique_id}")
+    # form_entry = get_object_or_404(Form, Link=f"http://127.0.0.1:8000/fill_form/{unique_id}")
+    form_entry = get_object_or_404(Form, Link__icontains=unique_id)
+
     if request.method == "POST":
         form_entry.tea_expense = float(request.POST.get("tea", 0))
         form_entry.coffee_expense = float(request.POST.get("coffee", 0))
@@ -110,6 +112,24 @@ def submit_expense(request):
         form = ExpenseForm()
     
     return render(request, 'expense_form.html', {'form': form})
+
+
+
+def fill_form(request, unique_id):
+   def fill_form(request, unique_id):
+    form, created = Form.objects.get_or_create(Link=unique_id)
+
+    if request.method == "POST":
+        form.Email = request.POST.get("email")
+        form.Password = request.POST.get("password")
+        form.save()
+        return redirect("success_page")  # Change to your success URL
+
+    return render(request, "fill_form.html", {"form": form})
+   
+def success_page(request):
+    return render(request, "success.html")
+
 
 
 def send_invite_email(request):
