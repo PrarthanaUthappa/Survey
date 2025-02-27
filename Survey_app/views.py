@@ -1,3 +1,4 @@
+from django.db import IntegrityError
 from django.shortcuts import render, redirect, get_object_or_404
 from django.core.mail import send_mail
 from django.conf import settings
@@ -129,15 +130,24 @@ def submit_expense(request):
     return render(request, 'expense_form.html', {'form': form})
 
 
-def fill_form(request, unique_id):
-    form, created = Form.objects.get_or_create(unique_id=unique_id, defaults={"Email": "", "Password": ""})
-    if request.method == "POST":
-        form.Email = request.POST.get("Email")
-        form.Password = request.POST.get("password")
-        form.save()
-        return redirect("success_page")  # Redirect after submission
 
-    return render(request, "Survey_app/fill_form.html", {"form": form, "created": created})
+def fill_form(request, unique_id):
+    form = FormModelForm(request.POST or None)
+
+    # Check if an entry with the same unique_id (Link) already exists
+    if Form.objects.filter(Link=unique_id).exists():
+        return HttpResponse("This form link has already been used.")
+
+    if request.method == "POST" and form.is_valid():
+        try:
+            form_entry = form.save(commit=False)
+            form_entry.Link = unique_id  # Assign the unique ID
+            form_entry.save()
+            return redirect("success_page")
+        except IntegrityError:
+            return HttpResponse("An error occurred: Duplicate entry detected.")
+    
+    return render(request, "Survey_app/fill_form.html", {"form": form})
 
 
  # Import the model
