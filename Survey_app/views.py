@@ -165,34 +165,58 @@ def success_page(request):
     return render(request, "Survey_app/success.html")
 
 
+
 def send_invite_email(request):
-    recipient_email = "prarthanauthappa713@gmail.com"
-    unique_id = str(uuid.uuid4()) 
-    # form_link = f"http://127.0.0.1:8000/fill_form/{unique_id}"
-    form_link = request.build_absolute_uri(f"/fill_form/{unique_id}/")
+    form = FormModelForm(request.POST or None)
 
- 
+    if request.method == "POST" and form.is_valid():
+        recipient_email = form.cleaned_data["Email"]  # Get user email
+        unique_id = str(uuid.uuid4())  
+        form_link = request.build_absolute_uri(f"/fill_form/{unique_id}/")
 
-    subject = "Fill Out Your Daily Expenses"
-    message = f"""
-    Hello,
+        subject = "Fill Out Your Daily Expenses"
+        message = f"""
+        Hello,
 
-    You have to submit the following expenses for approval:
-    
-    Please fill out the form by clicking the link below:
+        You have to submit the following expenses for approval:
+        
+        Please fill out the form by clicking the link below:
 
-    {form_link}
+        {form_link}
 
-    Best regards,
-    Admin
-    """
+        Best regards,
+        Admin
+        """
+        from_email = "settings.EMAIL_HOST_USER"
+        recipient_list = [recipient_email]
 
-    from_email = "settings.EMAIL_HOST_USER"  
-    recipient_list = [recipient_email]
+        send_mail(subject, message, from_email, recipient_list, fail_silently=False)
 
-    send_mail(subject, message, from_email, recipient_list, fail_silently=False)
+        return redirect("success_page")  # Redirect to success page
 
-    return HttpResponse("Email sent successfully!")
+    return render(request, "survey_app/form_template.html", {"form": form})
+
+
+
+
+# def send_invite_email(request):
+#     if request.method == 'POST':
+#         form = FormModelForm(request.POST)
+#         if form.is_valid():
+#             user = form.save(commit=False)
+#             # user.set_password('temp_password')  # Temporary password
+#             user.save()
+#             link = f"http://127.0.0.1:8000/survey/{user.id}/"
+#             send_mail(
+#                 'Survey Link',
+#                 f'Click this link to fill out the survey: {link}',
+#                 'your_email@example.com',
+#                 [user.email]
+#             )
+#             return redirect('survey_sent')
+#     else:
+#         form = FormModelForm()
+#     return render(request, 'survey_app/form_template.html', {'form': form})
 
 
 @login_required
