@@ -3,12 +3,13 @@ from django.core.mail import send_mail
 from django.conf import settings
 from django.contrib.auth.decorators import login_required, user_passes_test
 from django.contrib import messages
-from .models import Form
+from django.shortcuts import render, redirect
+from .forms import FormModelForm,ExpenseForm # Import the form
+from .models import Expense,Form 
+from django.http import HttpResponseForbidden
 import uuid
 import random
-import string
-from .models import Expense, Form
-from .forms import ExpenseForm
+import string 
 from django.http import HttpResponse
 
 # Access control for admins
@@ -18,6 +19,8 @@ def is_admin(user):
 @login_required
 @user_passes_test(is_admin)
 def review_expenses(request):
+    if not request.user.is_staff:
+        return HttpResponseForbidden("You are not authorized to review expenses.")
     expenses = Expense.objects.filter(status="Pending")
     return render(request, "review_expenses.html", {"expenses": expenses})
 
@@ -42,6 +45,7 @@ def review_expenses(request):
 @login_required
 @user_passes_test(is_admin)
 def Survey_email(request):
+    form=ExpenseForm()
     if request.method == "POST":
         form = ExpenseForm(request.POST)
         if form.is_valid():
@@ -50,7 +54,7 @@ def Survey_email(request):
             form_link = f"http://127.0.0.1:8000/fill_form/{unique_id}"
             
             # Save to database
-            Form.objects.create(Email=Email, Link=form_link, Unique_id=unique_id)
+            Form.objects.create(Email=Email, Link=form_link, unique_id=unique_id)
 
             send_expense_email(Email, "Submitted", form_link)
             messages.success(request, "Form link sent successfully!")
@@ -60,24 +64,24 @@ def Survey_email(request):
 
 @login_required
 def submit_expense_with_id(request, unique_id):
-    # form_entry = get_object_or_404(Form, Link=f"http://127.0.0.1:8000/fill_form/{unique_id}")
-    form_entry = get_object_or_404(Form, unique_id=unique_id)
-    # Try to fetch the form entry, create one if not found
-    form_entry, created = Form.objects.get_or_create(Link=unique_id)
+    form_entry, created = Form.objects.get_or_create(unique_id=unique_id)
 
     if created:
         print(f"New Form entry created for unique_id: {unique_id}")
+
     if request.method == "POST":
         form_entry.tea_expense = float(request.POST.get("tea", 0))
         form_entry.coffee_expense = float(request.POST.get("coffee", 0))
         form_entry.smoking_expense = float(request.POST.get("smoking", 0))
         form_entry.biscuit_expense = float(request.POST.get("biscuit", 0))
-        form_entry.isapprove = False
+        form_entry.isapprove = False  # Mark as pending approval
         form_entry.save()
         send_expense_email(form_entry.Email, "Submitted", form_entry.Link)
         messages.success(request, "Expense submitted successfully! Awaiting admin approval.")
         return redirect("success_page")
+
     return render(request, "Survey_app/fill_form.html", {"form_entry": form_entry})
+
 
 @login_required
 @user_passes_test(is_admin)
@@ -88,7 +92,7 @@ def dashboard(request):
 
 
 def admin_review_forms(request):
-    pending_forms = Form.objects.filter(approved=False)
+    pending_forms = Form.objects.filter(isapprove=False)
     return render(request, "admin_review.html", {"pending_forms": pending_forms})
 
 
@@ -97,7 +101,7 @@ def admin_review_forms(request):
 def approve_form(request):
     if request.method == "POST":
         form_id = request.POST.get("form_id")
-        form_entry = Form.objects.get(id=form_id)
+        form_entry = get_object_or_404(Form, id=form_id)
         form_entry.approved = True
         form_entry.save()
         return redirect("admin_review_forms")
@@ -126,15 +130,35 @@ def submit_expense(request):
 
 
 def fill_form(request, unique_id):
-    form, created = Form.objects.get_or_create(Link=unique_id, defaults={"Email": "", "Password": ""})
-    
+    form, created = Form.objects.get_or_create(unique_id=unique_id, defaults={"Email": "", "Password": ""})
     if request.method == "POST":
-        form.Email = request.POST.get("email")
+        form.Email = request.POST.get("Email")
         form.Password = request.POST.get("password")
         form.save()
         return redirect("success_page")  # Redirect after submission
 
     return render(request, "Survey_app/fill_form.html", {"form": form, "created": created})
+
+
+ # Import the model
+
+def submit_form(request):
+    if request.method == "POST":
+        form = FormModelForm(request.POST)
+        print("📝 Form Data Received:", request.POST)  # Debugging output
+
+        if form.is_valid():
+            form_entry = form.save(commit=False)
+            print("✅ Captured Email Before Save:", form_entry.Email)  # Debug Email
+            form_entry.save()
+            print("💾 Form saved successfully!")
+            return redirect("success")  # Redirect to success page
+        else:
+            print("❌ Form Errors:", form.errors)  # Debug validation errors
+
+    else:
+        form = FormModelForm()
+    return render(request, "form_template.html", {"form": form})
 
 
 def success_page(request):
@@ -163,7 +187,7 @@ def send_invite_email(request):
     Admin
     """
 
-    from_email = "prathanauthappa713@gmail.com"  
+    from_email = "settings.EMAIL_HOST_USER"  
     recipient_list = [recipient_email]
 
     send_mail(subject, message, from_email, recipient_list, fail_silently=False)

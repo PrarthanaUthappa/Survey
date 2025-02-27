@@ -1,4 +1,11 @@
+
 from django import forms
+from .models import Form  # Import the correct model
+
+class FormModelForm(forms.ModelForm):
+    class Meta:
+        model = Form  # Make sure this matches your model
+        fields = ["Email"]  # Use "Email" with capital 'E' to match the model
 
 class ExpenseForm(forms.Form):
     tea_expense = forms.DecimalField(label="Tea Expense ($)", required=False, min_value=0)
