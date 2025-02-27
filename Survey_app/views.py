@@ -52,8 +52,12 @@ def Survey_email(request):
         if form.is_valid():
             Email = form.cleaned_data["Email"]
             unique_id = str(uuid.uuid4())  # Generate UUID
-            form_link = f"http://127.0.0.1:8000/fill_form/{unique_id}"
-            
+            # form_link = f"http://127.0.0.1:8000/fill_form/{unique_id}"
+            # Replace '192.168.x.x' with your actual local IP
+            form_link = f"http://192.168.50.56:8000/fill_form/{unique_id}/"
+
+
+
             # Save to database
             Form.objects.create(Email=Email, Link=form_link, unique_id=unique_id)
 
